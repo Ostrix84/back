@@ -9,16 +9,25 @@ function modbus_filter(packet)
         -- Filtrage des paquets Modbus entre 192.168.1.11 et 192.168.1.13
         if src_ip == "192.168.1.11" and dst_ip == "192.168.1.13" then
             -- Modifier le registre de holding de 192.168.1.11 (offset 0) à 500
-            if packet.payload.string:find("\x00\x06\x00\x00\x00\x06\x00\x03\x00\x00\x00\x01") then
-                packet.payload.string = packet.payload.string:gsub("\x00\x06\x00\x00\x00\x06\x00\x03\x00\x00\x00\x01", "\x00\x06\x00\x00\x00\x03\x00\x01\xf4")
+            local modbus_payload = packet.payload.string
 
-            end
-            -- Modifier le registre de holding de 192.168.1.13 (offset 0) à 25
-            if packet.payload.string:find("\x00\x06\x00\x00\x00\x06\x00\x03\x00\x00\x00\x01") then
-                packet.payload.string = packet.payload.string:gsub("\x00\x06\x00\x00\x00\x06\x00\x03\x00\x00\x00\x01", "\x00\x06\x00\x00\x00\x03\x00\x00\x19")
+            -- Recherche de la séquence spécifique à modifier pour 192.168.1.11
+            local search_pattern_11 = "\x00\x06\x00\x00\x00\x06\x00\x03\x00\x00\x00\x01"
+            local replace_pattern_11 = "\x00\x06\x00\x00\x00\x03\x00\x01\xf4"
 
+            -- Recherche de la séquence spécifique à modifier pour 192.168.1.13
+            local search_pattern_13 = "\x00\x06\x00\x00\x00\x06\x00\x03\x00\x00\x00\x01"
+            local replace_pattern_13 = "\x00\x06\x00\x00\x00\x03\x00\x00\x19"
+
+            -- Effectuer les remplacements dans le payload Modbus
+            if modbus_payload:find(search_pattern_11) then
+                modbus_payload = modbus_payload:gsub(search_pattern_11, replace_pattern_11)
+            elseif modbus_payload:find(search_pattern_13) then
+                modbus_payload = modbus_payload:gsub(search_pattern_13, replace_pattern_13)
             end
-            
+
+            -- Mettre à jour le payload du paquet avec les modifications
+            packet.payload.string = modbus_payload
         end
 
         -- Retourner le paquet modifié ou non modifié
