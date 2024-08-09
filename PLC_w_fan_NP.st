@@ -314,7 +314,7 @@ PROGRAM program0
     Voltage_sent AT %QW100 : INT;
   END_VAR
   VAR
-    Voltage_24V : REAL := 24.0;
+    Voltage_12V : REAL := 12.0;
     Voltage_Limit : BOOL;
     _100 : REAL := 100.0;
   END_VAR
@@ -326,7 +326,6 @@ PROGRAM program0
     P : REAL := 25.0;
     I : REAL := 10.0;
     _D : REAL := 1.0;
-    _min : REAL := -24.0;
     _0 : REAL := 0.0;
     Test : REAL;
     Test0 : REAL;
@@ -360,14 +359,14 @@ PROGRAM program0
   _TMP_INT_TO_BOOL76_OUT := INT_TO_BOOL(OnOff);
   _TMP_AND83_OUT := AND(_TMP_NOT84_OUT, _TMP_INT_TO_BOOL76_OUT);
   _TMP_NOT81_OUT := NOT(_TMP_AND83_OUT);
-  CTRL_PID0(ACT := _TMP_DIV14_OUT, SET := _TMP_INT_TO_REAL1_OUT, M_I := _0, MAN := _TMP_NOT81_OUT, KP := P, TN := I, TV := _D, LL := _min, LH := Voltage_24V);
+  CTRL_PID0(ACT := _TMP_DIV14_OUT, SET := _TMP_INT_TO_REAL1_OUT, M_I := _0, MAN := _TMP_NOT81_OUT, KP := P, TN := I, TV := _D, LL := _0, LH := Voltage_12V);
   _TMP_MUL4_OUT := MUL(CTRL_PID0.Y, _100);
   _TMP_REAL_TO_INT59_OUT := REAL_TO_INT(_TMP_MUL4_OUT);
   Voltage_sent := _TMP_REAL_TO_INT59_OUT;
   Test := CTRL_PID0.Y;
   Voltage_Limit := CTRL_PID0.LIM;
   Test0 := CTRL_PID0.DIFF;
-  _TMP_REAL_TO_INT6_OUT := REAL_TO_INT(_min);
+  _TMP_REAL_TO_INT6_OUT := REAL_TO_INT(_0);
   _TMP_GE91_OUT := GE(Power_Fan, _TMP_REAL_TO_INT6_OUT);
   _TMP_BOOL_TO_INT92_OUT := BOOL_TO_INT(_TMP_GE91_OUT);
   _TMP_MUL93_OUT := MUL(_TMP_BOOL_TO_INT92_OUT, Power_Fan);
